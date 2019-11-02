@@ -1,6 +1,6 @@
 import Sequelize, { Model } from 'sequelize';
 
-class Matricuals extends Model {
+class Matricula extends Model {
   static init(sequelize) {
     super.init(
       {
@@ -14,6 +14,11 @@ class Matricuals extends Model {
     );
     return this;
   }
+
+  static associate(models) {
+    this.belongsTo(models.Plan, { foreignKey: 'plan_id', as: 'plan' });
+    this.belongsTo(models.Student, { foreignKey: 'student_id', as: 'student' });
+  }
 }
 
-export default Matricuals;
+export default Matricula;
