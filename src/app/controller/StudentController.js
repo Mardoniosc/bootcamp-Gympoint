@@ -37,6 +37,38 @@ class StudentController {
       },
     });
   }
+
+  async update(req, res) {
+    const schema = Yup.object().shape({
+      nome: Yup.string(),
+      email: Yup.string().email(),
+      idade: Yup.number(),
+      peso: Yup.number(),
+      altura: Yup.number(),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validação de dados falhou' });
+    }
+
+    const student = await Student.findByPk(req.params.id);
+
+    if (!student) {
+      return res.status(400).json({ error: 'Estudante não encotrado' });
+    }
+
+    const { nome, email, idade, peso, altura } = await student.update(req.body);
+
+    return res.json({
+      student: {
+        nome,
+        email,
+        idade,
+        peso,
+        altura,
+      },
+    });
+  }
 }
 
 export default new StudentController();
