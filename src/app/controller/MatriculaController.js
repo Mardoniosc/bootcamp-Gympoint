@@ -1,8 +1,10 @@
 import * as Yup from 'yup';
-import { addDays } from 'date-fns';
+import { addDays, format } from 'date-fns';
+import pt from 'date-fns/locale/pt';
 import Matricula from '../models/Matricula';
 import Plan from '../models/Plan';
 import Student from '../models/Student';
+import Mail from '../../lib/Mail';
 
 class MatriculaController {
   async index(req, res) {
@@ -72,6 +74,36 @@ class MatriculaController {
       price,
       plan_id,
       student_id,
+    });
+    const matricula = await Matricula.findOne({
+      where: { student_id: id },
+      attributes: ['id', 'start_date', 'end_date', 'price'],
+      include: [
+        {
+          model: Student,
+          as: 'student',
+          attributes: ['id', 'nome', 'email', 'idade', 'peso', 'altura'],
+        },
+        {
+          model: Plan,
+          as: 'plan',
+          attributes: ['id', 'title', 'duration'],
+        },
+      ],
+    });
+
+    await Mail.sendMail({
+      to: `${matricula.student.nome} <${matricula.student.email}>`,
+      subject: 'Bem vindo a Gympoint',
+      template: 'wellcome',
+      context: {
+        student: matricula.student.nome,
+        plan_title: matricula.plan.title,
+        price: matricula.price,
+        end_date: format(matricula.end_date, "'Dia ' dd 'de' MMMM 'de' yyyy", {
+          locale: pt,
+        }),
+      },
     });
     return res.json({
       matricula: {
