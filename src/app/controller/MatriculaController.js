@@ -1,10 +1,10 @@
 import * as Yup from 'yup';
-import { addDays, format } from 'date-fns';
-import pt from 'date-fns/locale/pt';
+import { addDays } from 'date-fns';
 import Matricula from '../models/Matricula';
 import Plan from '../models/Plan';
 import Student from '../models/Student';
-import Mail from '../../lib/Mail';
+import WellcomeMail from '../jobs/WellcomeMail';
+import Queue from '../../lib/Queue';
 
 class MatriculaController {
   async index(req, res) {
@@ -92,19 +92,10 @@ class MatriculaController {
       ],
     });
 
-    await Mail.sendMail({
-      to: `${matricula.student.nome} <${matricula.student.email}>`,
-      subject: 'Bem vindo a Gympoint',
-      template: 'wellcome',
-      context: {
-        student: matricula.student.nome,
-        plan_title: matricula.plan.title,
-        price: matricula.price,
-        end_date: format(matricula.end_date, "'Dia ' dd 'de' MMMM 'de' yyyy", {
-          locale: pt,
-        }),
-      },
+    await Queue.add(WellcomeMail.key, {
+      matricula,
     });
+
     return res.json({
       matricula: {
         start_date,
