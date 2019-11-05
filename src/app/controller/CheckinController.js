@@ -27,7 +27,7 @@ class CheckinController {
       },
     });
 
-    if (totalChekins.length > 5) {
+    if (totalChekins.length >= 5) {
       return res
         .status(401)
         .json({ error: 'Usuário já fez 5 checkins nos ultimos 7 dias' });
