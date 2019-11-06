@@ -49,8 +49,11 @@ class HelpOrdersAcademyController {
     await Queue.add(HelpOrderMail.key, {
       helpOrder,
     });
-
-    return res.json(help_orders);
+    const { question } = helpOrder;
+    return res.json({
+      question,
+      answer,
+    });
   }
 }
 
